@@ -4,7 +4,7 @@ import random
 #1 配置圖片地址
 IMAGE_PATH = 'imgs/'
 #1 設置頁面寬高
-scrrr_width=800
+scrrr_width = 800
 scrrr_height =560
 #1 創建控制遊戲結束的狀態
 GAMEOVER = False
@@ -43,7 +43,7 @@ class Sunflower(Plant):
         self.rect = self.image.get_rect()
         self.rect.x = x
         self.rect.y = y
-        self.price = 50
+        self.price = 30
         self.hp = 100
         #5 時間計數器
         self.time_count = 0
@@ -212,7 +212,7 @@ class MainGame():
     #2 文本繪制
     def draw_text(self, content, size, color):
         pygame.font.init()
-        font = pygame.font.Font("fontsmsjh.ttf", 20)         
+        font = pygame.font.Font("fontsmsjh.ttf",size)         
         text = font.render(content, True, color)
         return text
 
@@ -304,7 +304,7 @@ class MainGame():
                         MainGame.plants_list.append(sunflower)
                         print('當前植物列表長度:{}'.format(len(MainGame.plants_list)))
                         map.can_grow = False
-                        MainGame.money -= 50
+                        MainGame.money -= 30
                 elif e.button == 3:
                     if map.can_grow and MainGame.money >= 50:
                         peashooter = PeaShooter(map.position[0], map.position[1])
@@ -330,6 +330,38 @@ class MainGame():
                 zombie.hit_plant()
             else:
                 MainGame.zombie_list.remove(zombie)
+                
+        # 顯示初始畫面
+    
+    #初始畫面
+    def show_start_screen(self):
+        self.init_window()
+
+        # 載入並縮放起始畫面圖片
+        start_image = pygame.image.load("imgs/植物大戰殭屍.png")
+        start_image = pygame.transform.scale(start_image, (scrrr_width, scrrr_height))
+        MainGame.window.blit(start_image, (0, 0))
+
+        # 設定字體與顏色（使用系統字體或指定 TTF）
+        tip_text = self.draw_text("點擊任意處開始遊戲",25, (0, 0, 0))  # 黑色文本
+
+        # 顯示在畫面中間偏下的位置（可微調 Y 值）
+        tip_rect = tip_text.get_rect(center=(scrrr_width // 2 + 75, scrrr_height // 2 - 15 ))
+        MainGame.window.blit(tip_text, tip_rect)
+
+        pygame.display.update()
+
+        # 等待玩家點擊
+        waiting = True
+        while waiting:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    exit()
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    waiting = False
+
+#1 主遊戲類
     #1 開始遊戲
     def start_game(self):
         #1 初始化窗口
@@ -380,4 +412,5 @@ class MainGame():
 #1 啟動主程序
 if __name__ == '__main__':
     game = MainGame()
+    game.show_start_screen()
     game.start_game()
