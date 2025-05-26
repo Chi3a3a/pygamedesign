@@ -1,29 +1,32 @@
-#1 引入需要的模塊
 import pygame
 import random
-#1 配置圖片地址
-IMAGE_PATH = 'imgs/'
-#1 設置頁面寬高
+
 scrrr_width = 800
 scrrr_height =560
-#1 創建控制遊戲結束的狀態
+
+#創建控制遊戲結束的狀態
 GAMEOVER = False
-#4 圖片加載報錯處理
+
+#圖片加載報錯處理
 LOG = '文件:{}中的方法:{}出錯'.format(__file__,__name__)
-#3 創建地圖類
+
+#創建地圖
 class Map():
-    #3 存儲兩張不同顏色的圖片名稱
-    map_names_list = [IMAGE_PATH + 'map1.png', IMAGE_PATH + 'map2.png']
-    #3 初始化地圖
+    #載入兩張不同顏色的圖片名稱
+    map_names_list = ['imgs/map1.png','imgs/map2.png']
+    
+    #初始化地圖
     def __init__(self, x, y, img_index):
         self.image = pygame.image.load(Map.map_names_list[img_index])
         self.position = (x, y)
         # 是否能夠種植
         self.can_grow = True
-    #3 加載地圖
+        
+    #加載地圖
     def load_map(self):
          MainGame.window.blit(self.image,self.position)
-#4 植物類
+         
+#植物類
 class Plant(pygame.sprite.Sprite):
     def __init__(self):
         super(Plant, self).__init__()
@@ -35,7 +38,7 @@ class Plant(pygame.sprite.Sprite):
             MainGame.window.blit(self.image, self.rect)
         else:
             print(LOG)
-#5 向日葵類
+#5 向日葵
 class Sunflower(Plant):
     def __init__(self,x,y):
         super(Sunflower, self).__init__()
@@ -48,16 +51,17 @@ class Sunflower(Plant):
         #5 時間計數器
         self.time_count = 0
 
-    #5 新增功能：生成陽光
+    #新增功能：生成陽光
     def produce_money(self):
         self.time_count += 1
         if self.time_count == 25:
             MainGame.money += 5
             self.time_count = 0
-    #5 向日葵加入到窗口中
+    #向日葵加入到畫面中
     def display_sunflower(self):
         MainGame.window.blit(self.image,self.rect)
-#6 豌豆射手類
+        
+#豌豆射手
 class PeaShooter(Plant):
     def __init__(self,x,y):
         super(PeaShooter, self).__init__()
@@ -68,32 +72,32 @@ class PeaShooter(Plant):
         self.rect.y = y
         self.price = 50
         self.hp = 200
-        #6 發射計數器
+        #發射計數器
         self.shot_count = 0
 
-    #6 增加射擊方法
+    #增加射擊方法
     def shot(self):
-        #6 記錄是否應該射擊
+        #記錄是否應該射擊
         should_fire = False
         for zombie in MainGame.zombie_list:
             if zombie.rect.y == self.rect.y and zombie.rect.x < 800 and zombie.rect.x > self.rect.x:
                 should_fire = True
-        #6 如果活著
+        #如果活著
         if self.live and should_fire:
             self.shot_count += 1
-            #6 計數器到25發射一次
+            #計數器到25發射一次
             if self.shot_count == 25:
-                #6 基於當前豌豆射手的位置，創建子彈
+                #基於當前豌豆射手的位置，創建子彈
                 peabullet = PeaBullet(self)
-                #6 將子彈存儲到子彈列表中
+                #將子彈存儲到子彈列表中
                 MainGame.peabullet_list.append(peabullet)
                 self.shot_count = 0
 
-    #6 將豌豆射手加入到窗口中的方法
+    #將豌豆射手加入到畫面中
     def display_peashooter(self):
         MainGame.window.blit(self.image,self.rect)
 
-#7 豌豆子彈類
+#豌豆子彈
 class PeaBullet(pygame.sprite.Sprite):
     def __init__(self,peashooter):
         self.live = True
@@ -105,13 +109,13 @@ class PeaBullet(pygame.sprite.Sprite):
         self.rect.y = peashooter.rect.y + 15
 
     def move_bullet(self):
-        #7 在屏幕範圍內，實現往右移動
+        #在屏幕範圍內，實現往右移動
         if self.rect.x < scrrr_width:
             self.rect.x += self.speed
         else:
             self.live = False
 
-    #7 新增，子彈與僵屍的碰撞
+    #新增，子彈與僵屍的碰撞
     def hit_zombie(self):
         for zombie in MainGame.zombie_list:
             if pygame.sprite.collide_rect(self,zombie):
@@ -122,7 +126,7 @@ class PeaBullet(pygame.sprite.Sprite):
                 if zombie.hp <= 0:
                     zombie.live = False
                     self.nextLevel()
-    #7闖關方法
+    #闖關方法
     def nextLevel(self):
         MainGame.score += 20
         MainGame.remnant_score -=20
@@ -131,12 +135,11 @@ class PeaBullet(pygame.sprite.Sprite):
                     MainGame.remnant_score=100*i
                     MainGame.shaoguan+=1
                     MainGame.produce_zombie+=50
-
-
-
+                    
     def display_peabullet(self):
         MainGame.window.blit(self.image,self.rect)
-#9 僵屍類
+        
+#僵屍類
 class Zombie(pygame.sprite.Sprite):
     def __init__(self,x,y):
         super(Zombie, self).__init__()
@@ -149,43 +152,43 @@ class Zombie(pygame.sprite.Sprite):
         self.speed = 1
         self.live = True
         self.stop = False
-    #9 僵屍的移動
+    #僵屍的移動
     def move_zombie(self):
         if self.live and not self.stop:
             self.rect.x -= self.speed
             if self.rect.x < -80:
-                #8 調用遊戲結束方法
+                #調用遊戲結束方法
                 MainGame().gameOver()
 
-    #9 判斷僵屍是否碰撞到植物，如果碰撞，調用攻擊植物的方法
+    # 判斷僵屍是否碰撞到植物，如果碰撞，調用攻擊植物的方法
     def hit_plant(self):
         for plant in MainGame.plants_list:
             if pygame.sprite.collide_rect(self,plant):
                 #8  僵屍移動狀態的修改
                 self.stop = True
                 self.eat_plant(plant)
-    #9 僵屍攻擊植物
+    # 僵屍攻擊植物
     def eat_plant(self,plant):
-        #9 植物生命值減少
+        # 植物生命值減少
         plant.hp -= self.damage
-        #9 植物死亡後的狀態修改，以及地圖狀態的修改
+        # 植物死亡後的狀態修改，以及地圖狀態的修改
         if plant.hp <= 0:
             a = plant.rect.y // 80 - 1
             b = plant.rect.x // 80
             map = MainGame.map_list[a][b]
             map.can_grow = True
             plant.live = False
-            #8 修改僵屍的移動狀態
+            # 修改僵屍的移動狀態
             self.stop = False
 
-
-
-    #9 將僵屍加載到地圖中
+    # 將僵屍加載到地圖中
     def display_zombie(self):
         MainGame.window.blit(self.image,self.rect)
+        
+        
 #1 主程序
 class MainGame():
-    #2 創建關數，得分，剩余分數，錢數
+    #2 創建關數，得分，剩餘分數，錢數
     shaoguan = 1
     score = 0
     remnant_score = 100
@@ -218,7 +221,7 @@ class MainGame():
 
     #2 加載幫助提示
     def load_help_text(self):
-        text1 = self.draw_text('1.按左鍵創建向日葵 2.按右鍵創建豌豆射手', 26, (255, 0, 0))
+        text1 = self.draw_text('1.按左鍵放置向日葵 2.按右鍵放置豌豆射手', 26, (255, 0, 0))
         MainGame.window.blit(text1, (5, 5))
 
     #3 初始化坐標點
@@ -407,8 +410,29 @@ class MainGame():
         MainGame.window.blit(self.draw_text('遊戲結束', 50, (255, 0, 0)), (300, 200))
         print('遊戲結束')
         pygame.time.wait(400)
+        game.show_start_screen()
+        # 重置遊戲狀態
         global GAMEOVER
         GAMEOVER = True
+        MainGame.plants_list.clear()
+        MainGame.peabullet_list.clear()
+        MainGame.zombie_list.clear()
+        MainGame.map_list.clear()
+        MainGame.map_points_list.clear()
+        MainGame.shaoguan = 1
+        MainGame.score = 0
+        MainGame.remnant_score = 100    
+        MainGame.money = 200
+        MainGame.count_zombie = 0
+        MainGame.produce_zombie = 100
+        # 重新初始化地圖
+        self.init_plant_points()
+        self.init_map()
+        # 重新初始化僵屍
+        self.init_zombies()
+        # 重新開始遊戲
+        GAMEOVER = False
+        self.start_game()
 #1 啟動主程序
 if __name__ == '__main__':
     game = MainGame()
