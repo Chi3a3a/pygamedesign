@@ -208,7 +208,7 @@ class GameManager:
             self.first_game_start = False
         
         """顯示遊戲開始畫面。"""
-        start_image = ResourceManager.load_image("植物大戰殭屍.png")
+        start_image = ResourceManager.load_image("start.png")
         start_image = pygame.transform.scale(start_image, (GameConfig.SCREEN_WIDTH, GameConfig.SCREEN_HEIGHT))
         self.game_state.screen.blit(start_image, (0, 0))
 
@@ -221,8 +221,7 @@ class GameManager:
         # --- 新增的「規則說明」文字 ---
         role_text = self._draw_text("規則說明", 25, (255, 255, 255)) # 白色文字
         # 計算文字位置，使其在「開始遊戲」文字下方
-        # 這裡我根據您的原始 offset (-95, +145) 進行調整，讓它看起來更合理
-        role_rect = role_text.get_rect(center=(GameConfig.SCREEN_WIDTH // 2 - 95, GameConfig.SCREEN_HEIGHT // 2 + 145))
+        role_rect = role_text.get_rect(center=(GameConfig.SCREEN_WIDTH // 2 - 67, GameConfig.SCREEN_HEIGHT // 2 + 127))
         self.game_state.screen.blit(role_text, role_rect)
         # --- 新增的「規則說明」文字結束 ---
 
@@ -263,8 +262,7 @@ class GameManager:
             "3. 殭屍會從右邊出現，向左移動。",
             "4. 如果殭屍突破防線，遊戲結束。",
             "5. 消滅殭屍可得分，達到一定分數進入下一關。",
-            "6. 關卡越高，殭屍出現越快，血量可能越高。",
-            "7. 按 'Q' 鍵隨時結束遊戲。",
+            "6. 按 'Q' 鍵隨時結束遊戲。",
             "",
             "點擊任意處返回主畫面..."
         ]
@@ -292,24 +290,25 @@ class GameManager:
 
     def game_over_screen(self):
         ResourceManager.stop_music() # 停止當前播放的背景音樂
+        win_image = ResourceManager.load_image("CLEAR.png")
+        lose_image = ResourceManager.load_image("GAMEOVER.png")
 
         if self.game_state.current_level >= GameConfig.MAX_LEVEL:
+            self.game_state.screen.blit(win_image, (0, 0))
             # 這裡需要更精確的勝利判斷，例如：所有殭屍被消滅，且達到最高關卡
             # 假設達到 MAX_LEVEL 且沒有殭屍殘留就算勝利
             if self.win_sound:
                 self.win_sound.play()
-            status_text = "恭喜通關！"
-            status_color = (0, 255, 0) # 綠色
+            self.game_state.screen.blit(self._draw_text('回主頁', 25, (0, 0, 0)), (360, 410))
+            self.game_state.screen.blit(self._draw_text(f'你的分數: {self.game_state.score}', 30, (255, 255, 255)), (300, 320))
+
         else:
+            self.game_state.screen.blit(lose_image, (0, 0))
             if self.lose_sound:
                 self.lose_sound.play()
-            status_text = "遊戲結束"
-            status_color = (255, 0, 0) # 紅色
+            self.game_state.screen.blit(self._draw_text('重新', 50, (255, 255, 255)), (525, 360))
+            self.game_state.screen.blit(self._draw_text(f'你的分數: {self.game_state.score}', 30, (255, 255, 255)), (500, 270))
 
-        self.game_state.screen.fill((0, 0, 0))
-        self.game_state.screen.blit(self._draw_text(status_text, 50, status_color), (300, 200))
-        self.game_state.screen.blit(self._draw_text(f'你的分數: {self.game_state.score}', 30, (255, 255, 255)), (300, 300))
-        self.game_state.screen.blit(self._draw_text('點擊任意處回到主畫面', 25, (255, 255, 0)), (270, 400))
         pygame.display.update()
         pygame.time.wait(1000)
 
